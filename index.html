@@ -163,7 +163,13 @@ select{padding:5px 8px;border:1px solid var(--rule);background:var(--card);borde
 .pair .r span{flex:1}
 .pair .r em{color:var(--ink2);font-size:12.5px;white-space:nowrap}
 .pair .d{font-size:12px;color:var(--ink3);margin-top:3px;font-style:italic}
+.xclose{display:none}
 @media (max-width:900px){
+  .xclose{display:flex;position:absolute;top:6px;z-index:5;width:34px;height:34px;align-items:center;justify-content:center;font:26px/1 Georgia,serif;color:var(--ink,#2d2a24);background:var(--card,#fbf7ea);border:1px solid var(--rule,#cfc6ad);border-radius:50%;cursor:pointer;padding:0}
+  #side .xclose{right:8px}#panel .xclose{left:8px}
+  #side,#panel{overscroll-behavior:contain;touch-action:pan-y}
+  #panel .ptabs{padding-left:48px}
+  #side>h2.sec:first-of-type{padding-right:48px}
   .only-m{display:inline-block;border:1px solid var(--rule);background:var(--card);padding:6px 10px;border-radius:3px;font-size:13px}
   #side,#panel{position:absolute;top:0;bottom:0;z-index:8;box-shadow:0 0 24px rgba(40,30,10,.3);transform:translateX(-105%);transition:transform .25s;max-width:92vw}
   #side{left:0}
@@ -191,6 +197,7 @@ select{padding:5px 8px;border:1px solid var(--rule);background:var(--card);borde
 </header>
 <div id="main">
   <aside id="side">
+    <button class="xclose" id="xSide" aria-label="Tanca les capes">×</button>
     <h2 class="sec">Què vols veure?</h2>
     <div class="tabs" id="tabs"></div>
     <div id="opts"></div>
@@ -217,6 +224,7 @@ select{padding:5px 8px;border:1px solid var(--rule);background:var(--card);borde
     <div id="loading">Dibuixant Catalunya…</div>
   </section>
   <aside id="panel">
+    <button class="xclose" id="xPanel" aria-label="Tanca la fitxa">×</button>
     <div class="ptabs" id="ptabs"><button data-p="fitxa" class="on">Fitxa</button><button data-p="comp">Comparar</button><button data-p="pairs">Parelles</button></div>
     <div id="pBody"></div>
   </aside>
@@ -617,6 +625,15 @@ function selectEnt(lv,i,opts){
 function openPanelMobile(){ if(window.innerWidth<=900){document.body.classList.add('panelopen');document.body.classList.remove('sideopen');} }
 $('#btnSide').onclick=()=>{document.body.classList.toggle('sideopen');document.body.classList.remove('panelopen');};
 $('#btnPanel').onclick=()=>{document.body.classList.toggle('panelopen');document.body.classList.remove('sideopen');};
+$('#xSide').onclick=()=>document.body.classList.remove('sideopen');
+$('#xPanel').onclick=()=>document.body.classList.remove('panelopen');
+(function(){ // swipe to close: panel → right, side → left
+  function sw(el,cls,dir){ let x0=null,y0=0;
+    el.addEventListener('touchstart',e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;},{passive:true});
+    el.addEventListener('touchend',e=>{ if(x0==null)return; const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0; x0=null;
+      if(Math.abs(dx)>60&&Math.abs(dx)>1.5*Math.abs(dy)&&dx*dir>0) document.body.classList.remove(cls); },{passive:true}); }
+  sw($('#panel'),'panelopen',1); sw($('#side'),'sideopen',-1);
+})();
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ S.A=null;S.B=null;S.pin=null;S.hover=null;renderPanel();needDraw=true; document.body.classList.remove('panelopen','sideopen'); } });
 /* ---------- search ---------- */
 const sIdx=[]; D.mun.name.forEach((n,i)=>sIdx.push({lv:'mun',i,n,k:norm(n),s:D.com.name[D.mun.com[i]]||''})); D.com.name.forEach((n,i)=>sIdx.push({lv:'com',i,n:'Comarca: '+n,k:norm(n),s:'comarca'}));
